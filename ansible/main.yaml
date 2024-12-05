@@ -1,0 +1,47 @@
+- hosts: flask_instance
+  become: true
+  tasks:
+    - name: Update yum repository
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install dependencies
+      yum:
+        name:
+          - "docker"
+        state: present
+
+    - name: Start Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Add user to Docker group
+      user:
+        name: ec2-user
+        groups: docker
+        append: yes
+
+    - name: Upload docker-compose file
+      ansible.builtin.copy:
+        src: ../compose-prod.yml
+        dest: /home/ec2-user/compose-prod.yml
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Install Docker Compose
+      shell: |
+        curl -L "https://github.com/docker/compose/releases/download/v2.31.0/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+
+    - name: Run docker compose up
+      ansible.builtin.shell: |
+        docker-compose -f /home/ec2-user/compose-prod.yml up -d
+      register: docker_compose_output
+
+    - name: Debug docker compose output
+      ansible.builtin.debug:
+        var: docker_compose_output.stdout
