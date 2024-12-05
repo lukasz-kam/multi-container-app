@@ -19,7 +19,7 @@ resource "aws_security_group" "web_sg" {
     from_port   = 27017
     to_port     = 27017
     protocol    = "tcp"
-    cidr_blocks = ["172.17.0.0/16", var.my_public_ip]
+    cidr_blocks = ["172.18.0.0/16", var.my_public_ip]
   }
 
   egress {

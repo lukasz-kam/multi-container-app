@@ -6,7 +6,7 @@
         name: "*"
         state: latest
 
-    - name: Install dependencies
+    - name: Install docker
       yum:
         name:
           - "docker"
