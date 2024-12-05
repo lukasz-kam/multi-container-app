@@ -4,12 +4,12 @@ from dotenv import dotenv_values
 from base64 import b64encode
 from nacl import encoding, public
 
-secrets = dotenv_values("../.env")
-gh_config = dotenv_values("../.gh_token")
-
-GITHUB_TOKEN = gh_config.get('GITHUB_TOKEN', "")
+SECRETS = dotenv_values("../.env")
+GH_TOKEN = dotenv_values("../.gh_token")
+GITHUB_TOKEN = GH_TOKEN.get('GITHUB_TOKEN', "")
 REPO_NAME = 'lukasz-kam/multi-container-app'
 API_URL = f'https://api.github.com/repos/{REPO_NAME}/actions/secrets'
+KEY_PATH = '../terraform/tfkey.pem'
 
 def get_github_public_key():
     url = f'https://api.github.com/repos/{REPO_NAME}/actions/secrets/public-key'
@@ -46,13 +46,24 @@ def set_github_secret(secret_name, secret_value, public_key):
 
     if response.status_code == 201:
         print(f'Successfully set secret: {secret_name}')
+    elif response.status_code ==204:
+        print(f'Successfully updated secret: {secret_name}')
     else:
         print(f'Error setting secret: {response.text}')
 
+def upload_ssh_key_to_github(public_key):
+    with open(KEY_PATH, 'r') as file:
+        ssh_key = file.read()
+
+    secret_name = 'SSH_EC2_KEY'
+    set_github_secret(secret_name, ssh_key, public_key)
+
 def upload_secrets_to_github():
     public_key = get_github_public_key()
-    for secret_name, secret_value in secrets.items():
+    for secret_name, secret_value in SECRETS.items():
         set_github_secret(secret_name, secret_value, public_key)
+
+    upload_ssh_key_to_github(public_key)
 
 if __name__ == "__main__":
     upload_secrets_to_github()
