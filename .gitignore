@@ -1,0 +1,4 @@
+.env
+*.pem
+/terraform/*.pem
+.gh_token
