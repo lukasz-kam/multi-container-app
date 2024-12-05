@@ -1,4 +1,5 @@
 import pytest
+import os
 from app import create_app
 from flask import json
 from pymongo import MongoClient
@@ -6,22 +7,23 @@ from bson import ObjectId
 
 @pytest.fixture
 def client():
-    app = create_app()
+    app = create_app('test')
     app.config['TESTING'] = True
     with app.test_client() as client:
         yield client
 
 @pytest.fixture
 def mongodb():
-    client = MongoClient('mongodb://localhost:27017/')
-    db = client['todoapp']
+    mongo_ip = os.getenv('MONGO_IP', 'localhost:27017')
+    client = MongoClient(f'mongodb://{mongo_ip}/')
+    db = client['todoapp_test']
     todos_collection = db['todos']
 
-    todos_collection.delete_many({})
+    todos_collection.drop()
 
     yield todos_collection
 
-    todos_collection.delete_many({})
+    todos_collection.drop()
 
 def test_get_all_todos(client, mongodb):
     response = client.get('/todos')

@@ -1,0 +1,34 @@
+services:
+  flask-app:
+    build:
+      context:  ./python-app
+      dockerfile: Dockerfile
+    container_name: flask_app
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_IP=mongo:27017
+    depends_on:
+      - mongo
+    networks:
+      - flask-mongo-network
+
+  mongo:
+    image: mongo@sha256:953225d39a4c29798b0d967c27b1affbe9b66d776f8f515d8174528b140bc0b8
+    container_name: mongo
+    restart: unless-stopped
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - flask-mongo-network
+
+networks:
+  flask-mongo-network:
+    driver: bridge
+
+volumes:
+  mongo_data:
+    driver: local
