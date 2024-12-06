@@ -1,0 +1,47 @@
+- hosts: flask_instance
+  become: true
+  tasks:
+    - name: Update yum repository
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install openssl
+      yum:
+        name:
+          - "openssl"
+        state: present
+
+    - name: Create directory for certificates
+      ansible.builtin.file:
+        path: /etc/mongodb/certs
+        state: directory
+        mode: '0755'
+
+    - name: Generate CSR
+      ansible.builtin.shell: openssl req -new -key mongodb-key.pem -out mongodb.csr
+      args:
+        chdir: /etc/mongodb/certs
+
+    - name: Generate certificate
+      ansible.builtin.shell: |
+        openssl x509 -req -in mongodb.csr -signkey mongodb-key.pem -out mongodb-cert.pem -days 365
+      args:
+        chdir: /etc/mongodb/certs
+
+    - name: Generate certificate
+      ansible.builtin.shell: cat mongodb-cert.pem mongodb-key.pem > mongodb.pem
+      args:
+        chdir: /etc/mongodb/certs
+
+    - name: Add PEM file path to mongo config
+      ansible.builtin.shell: |
+        sed -i '/^net:/a\
+          ssl:\
+            mode: requireSSL\
+            PEMKeyFile: /etc/mongodb/certs/mongodb.pem' /etc/mongod.conf
+
+    - name: Restart MongoDB
+      ansible.builtin.service:
+        name: mongod
+        state: restarted

@@ -55,5 +55,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install ansible
 
-      - name: Run Ansible playbook
+      - name: Deploy flask app and mongodb with ansible
         run: ansible-playbook ansible/main.yaml -i ansible/inventory -e "ansible_ssh_private_key_file=~/.ssh/id_rsa"
+
+      - name: Generate TLS certificate for mongodb
+        run: ansible-playbook ansible/generate_cert.yaml -i ansible/inventory -e "ansible_ssh_private_key_file=~/.ssh/id_rsa"
