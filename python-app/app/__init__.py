@@ -13,6 +13,8 @@ def create_app(env='dev'):
     else:
         app.config['MONGO_URI'] = f'mongodb://{mongo_ip}/todoapp'
 
+    app.config['MONGO_URI'] += '?ssl=true'
+
     mongo.init_app(app)
 
     from app.routes import init_routes
