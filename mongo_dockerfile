@@ -1,0 +1,9 @@
+FROM mongo@sha256:953225d39a4c29798b0d967c27b1affbe9b66d776f8f515d8174528b140bc0b8
+
+WORKDIR /etc/mongodb
+
+COPY certs /etc/mongodb/certs
+COPY mongod.conf /etc/mongodb/
+
+CMD ["mongod", "--config", "/etc/mongodb/mongod.conf"]
+

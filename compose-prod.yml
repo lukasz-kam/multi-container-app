@@ -13,13 +13,19 @@ services:
       - flask-mongo-network
 
   mongo:
-    image: mongo@sha256:953225d39a4c29798b0d967c27b1affbe9b66d776f8f515d8174528b140bc0b8
+    build:
+      context: .
+      dockerfile: mongo_dockerfile
     container_name: mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
     restart: unless-stopped
     ports:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    command: --config /etc/mongodb/mongod.conf
     networks:
       - flask-mongo-network
 
