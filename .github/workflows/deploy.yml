@@ -68,7 +68,9 @@ jobs:
             -u ec2-user \
             -e "server_ip=${{ secrets.SERVER_IP }}" \
             -e "ansible_ssh_private_key_file=~/.ssh/id_rsa" \
-            -e "mongo_user=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" \
-            -e "mongo_pass=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}"
+            -e "mongo_admin_user=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" \
+            -e "mongo_admin_pass=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" \
+            -e "db_username=${{ secrets.DB_USERNAME }}" \
+            -e "db_password=${{ secrets.DB_PASSWORD }}"
 
 

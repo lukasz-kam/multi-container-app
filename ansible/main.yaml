@@ -48,17 +48,35 @@
         group: root
         mode: '0644'
 
+    - name: Upload init.js file
+      ansible.builtin.copy:
+        src: ../init.js
+        dest: /home/ec2-user/init.js
+        owner: root
+        group: root
+        mode: '0644'
+
     - name: Install Docker Compose
       shell: |
         curl -L "https://github.com/docker/compose/releases/download/v2.31.0/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
         chmod +x /usr/local/bin/docker-compose
 
+    - name: Update admin secrets in init.js mongodb file
+      ansible.builtin.shell: |
+        sed -i 's/ADMIN_USER/{{ mongo_admin_user }}/g; s/ADMIN_PASSWORD/{{ mongo_admin_pass }}/g' /home/ec2-user/init.js
+
+    - name: Update secrets in init.js mongodb file
+      ansible.builtin.shell: |
+        sed -i 's/USER_TO_CHANGE/{{ db_username }}/g; s/PASS_TO_CHANGE/{{ db_password }}/g' /home/ec2-user/init.js
+
     - name: Run docker compose up
       ansible.builtin.shell: |
         docker-compose -f /home/ec2-user/compose-prod.yml up -d
       environment:
-        MONGO_INITDB_ROOT_USERNAME: "{{ mongo_user }}"
-        MONGO_INITDB_ROOT_PASSWORD: "{{ mongo_pass }}"
+        MONGO_INITDB_ROOT_USERNAME: "{{ mongo_admin_user }}"
+        MONGO_INITDB_ROOT_PASSWORD: "{{ mongo_admin_pass }}"
+        DB_USERNAME: "{{ db_username }}"
+        DB_PASSWORD: "{{ db_password }}"
       register: docker_compose_output
 
     - name: Debug docker compose output
