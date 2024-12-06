@@ -18,24 +18,23 @@
         state: directory
         mode: '0755'
 
-    - name: Generate private key
-      ansible.builtin.shell: openssl genpkey -algorithm RSA -out mongodb-key.pem -pkeyopt rsa_keygen_bits:2048
-      args:
-        chdir: /home/ec2-user/certs
-
-    - name: Generate CSR
-      ansible.builtin.shell: |
-        openssl req -new -key mongodb-key.pem -out mongodb.csr -subj "/C=US/ST=Some-State/L=Some-City/O=MyOrg/OU=IT/CN=myserver.example.com/emailAddress=admin@example.com"
-      args:
-        chdir: /home/ec2-user/certs
-
     - name: Generate certificate
       ansible.builtin.shell: |
-        openssl x509 -req -in mongodb.csr -signkey mongodb-key.pem -out mongodb-cert.pem -days 365
+        openssl req -newkey rsa:2048 -new -x509 -days 3650 -nodes -out mongodb-cert.crt -keyout mongodb-cert.key \
+        -subj "/C=US/ST=Some-State/L=Some-City/O=MyOrg/OU=IT/CN=myserver.example.com/emailAddress=admin@example.com"
       args:
         chdir: /home/ec2-user/certs
 
-    - name: Combine key and cert into one file
-      ansible.builtin.shell: cat mongodb-cert.pem mongodb-key.pem > mongodb.pem
+    - name: Combine MongoDB certificate and key
+      ansible.builtin.shell: cat mongodb-cert.key mongodb-cert.crt > mongodb.pem
       args:
         chdir: /home/ec2-user/certs
+
+    - name: Change file permissions to 644 for PEM and config files
+      ansible.builtin.file:
+        path: "{{ item }}"
+        mode: '0644'
+      with_items:
+        - /home/ec2-user/certs/mongodb.pem
+        - /home/ec2-user/certs/mongodb-cert.key
+        - /home/ec2-user/certs/mongodb-cert.crt

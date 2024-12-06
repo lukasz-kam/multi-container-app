@@ -5,5 +5,11 @@ WORKDIR /etc/mongodb
 COPY certs /etc/mongodb/certs
 COPY mongod.conf /etc/mongodb/
 
+RUN chown mongodb:mongodb /etc/mongodb/certs/*.pem && \
+    chmod 600 /etc/mongodb/certs/*.pem && \
+    chmod 755 /etc/mongodb/certs
+
+EXPOSE 27017
+
 CMD ["mongod", "--config", "/etc/mongodb/mongod.conf"]
 
