@@ -10,6 +10,7 @@ GITHUB_TOKEN = GH_TOKEN.get('GITHUB_TOKEN', "")
 REPO_NAME = 'lukasz-kam/multi-container-app'
 API_URL = f'https://api.github.com/repos/{REPO_NAME}/actions/secrets'
 KEY_PATH = '../terraform/tfkey.pem'
+INVENTORY_FILE = '../ansible/inventory'
 
 def get_github_public_key():
     url = f'https://api.github.com/repos/{REPO_NAME}/actions/secrets/public-key'
@@ -19,7 +20,6 @@ def get_github_public_key():
     }
     response = requests.get(url, headers=headers)
     response.raise_for_status()
-    print(response.json())
     return response.json()
 
 def encrypt_secret(secret_value, public_key):
@@ -51,6 +51,17 @@ def set_github_secret(secret_name, secret_value, public_key):
     else:
         print(f'Error setting secret: {response.text}')
 
+def upload_server_ip_to_github(public_key):
+    inventory_file = '/path/to/your/inventory'
+    with open(INVENTORY_FILE, 'r') as file:
+        lines = file.readlines()
+
+    line = lines[1].strip()
+    ip_address = line.split()[0]
+
+    secret_name = 'SERVER_IP'
+    set_github_secret(secret_name, ip_address, public_key)
+
 def upload_ssh_key_to_github(public_key):
     with open(KEY_PATH, 'r') as file:
         ssh_key = file.read()
@@ -64,6 +75,7 @@ def upload_secrets_to_github():
         set_github_secret(secret_name, secret_value, public_key)
 
     upload_ssh_key_to_github(public_key)
+    upload_server_ip_to_github(public_key)
 
 if __name__ == "__main__":
     upload_secrets_to_github()

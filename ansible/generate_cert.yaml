@@ -1,4 +1,4 @@
-- hosts: flask_instance
+- hosts: "{{ server_ip }}"
   become: true
   tasks:
     - name: Update yum repository

@@ -40,9 +40,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_EC2_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
-          SERVER_IP=$(awk 'NR > 1 {print $1}' < ansible/inventory)
-
+          SERVER_IP=${{ secrets.SERVER_IP }}
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
       - name: Set up Python
@@ -56,7 +54,7 @@ jobs:
           pip install ansible
 
       - name: Deploy flask app and mongodb with ansible
-        run: ansible-playbook ansible/main.yaml -i ansible/inventory -e "ansible_ssh_private_key_file=~/.ssh/id_rsa"
+        run: ansible-playbook ansible/main.yaml -i ${{ secrets.SERVER_IP }}, -u ec2-user -e "server_ip=${{ secrets.SERVER_IP }}" -e "ansible_ssh_private_key_file=~/.ssh/id_rsa"
 
       - name: Generate TLS certificate for mongodb
-        run: ansible-playbook ansible/generate_cert.yaml -i ansible/inventory -e "ansible_ssh_private_key_file=~/.ssh/id_rsa"
+        run: ansible-playbook ansible/generate_cert.yaml -i ${{ secrets.SERVER_IP }}, -u ec2-user -e "server_ip=${{ secrets.SERVER_IP }}" -e "ansible_ssh_private_key_file=~/.ssh/id_rsa"
