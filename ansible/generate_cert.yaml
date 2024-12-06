@@ -18,8 +18,14 @@
         state: directory
         mode: '0755'
 
+    - name: Generate private key
+      ansible.builtin.shell: openssl genpkey -algorithm RSA -out mongodb-key.pem -pkeyopt rsa_keygen_bits:2048
+      args:
+        chdir: /etc/mongodb/certs
+
     - name: Generate CSR
-      ansible.builtin.shell: openssl req -new -key mongodb-key.pem -out mongodb.csr
+      ansible.builtin.shell: |
+        openssl req -new -key mongodb-key.pem -out mongodb.csr -subj "/C=US/ST=Some-State/L=Some-City/O=MyOrg/OU=IT/CN=myserver.example.com/emailAddress=admin@example.com"
       args:
         chdir: /etc/mongodb/certs
 
@@ -29,19 +35,21 @@
       args:
         chdir: /etc/mongodb/certs
 
-    - name: Generate certificate
+    - name: Combine key and cert into one file
       ansible.builtin.shell: cat mongodb-cert.pem mongodb-key.pem > mongodb.pem
       args:
         chdir: /etc/mongodb/certs
 
-    - name: Add PEM file path to mongo config
+    - name: Copy certs folder from host to mongo container
+      ansible.builtin.shell: docker cp /etc/mongodb/certs mongo:/etc/mongodb/certs
+
+    - name: Add combined PEM file path to mongo config in the container
       ansible.builtin.shell: |
+        docker exec -it mongo bash\
         sed -i '/^net:/a\
           ssl:\
             mode: requireSSL\
             PEMKeyFile: /etc/mongodb/certs/mongodb.pem' /etc/mongod.conf
 
-    - name: Restart MongoDB
-      ansible.builtin.service:
-        name: mongod
-        state: restarted
+    - name: Restart mongodb container after configuration change
+      ansible.builtin.shell: docker restart mongo

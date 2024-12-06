@@ -53,6 +53,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install ansible
 
+      - name: Install docker collection for ansible
+        run: ansible-galaxy collection install community.docker
+
       - name: Deploy flask app and mongodb with ansible
         run: ansible-playbook ansible/main.yaml -i ${{ secrets.SERVER_IP }}, -u ec2-user -e "server_ip=${{ secrets.SERVER_IP }}" -e "ansible_ssh_private_key_file=~/.ssh/id_rsa"
 
