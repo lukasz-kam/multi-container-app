@@ -6,6 +6,8 @@ on:
       - master
     paths:
       - 'python-app/**'
+      - 'mongo-db/**'
+      - 'compose-prod.yml'
 
 jobs:
   build-and-push:

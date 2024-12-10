@@ -34,7 +34,7 @@
 
     - name: Upload mongo_dockerfile file
       ansible.builtin.copy:
-        src: ../mongo_dockerfile
+        src: ../mongo-db/mongo_dockerfile
         dest: /home/ec2-user/mongo_dockerfile
         owner: root
         group: root
@@ -42,7 +42,7 @@
 
     - name: Upload mongod.conf file
       ansible.builtin.copy:
-        src: ../mongod.conf
+        src: ../mongo-db/mongod.conf
         dest: /home/ec2-user/mongod.conf
         owner: root
         group: root
@@ -50,7 +50,7 @@
 
     - name: Upload init.js file
       ansible.builtin.copy:
-        src: ../init.js
+        src: ../mongo-db/init.js
         dest: /home/ec2-user/init.js
         owner: root
         group: root

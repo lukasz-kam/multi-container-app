@@ -20,8 +20,8 @@ services:
       dockerfile: mongo_dockerfile
     container_name: mongo
     environment:
-      MONGO_INITDB_ROOT_USERNAME: "${ MONGO_INITDB_ROOT_USERNAME }"
-      MONGO_INITDB_ROOT_PASSWORD: "${ MONGO_INITDB_ROOT_PASSWORD }"
+      MONGO_INITDB_ROOT_USERNAME: "${MONGO_INITDB_ROOT_USERNAME}"
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_INITDB_ROOT_PASSWORD}"
       DB_USERNAME: "${DB_USERNAME}"
       DB_PASSWORD: "${DB_PASSWORD}"
     restart: unless-stopped
